@@ -3587,8 +3587,6 @@ interactiveElements.forEach(element => {
 // Vincent sound effect on hero title hover
 const heroTitle = document.querySelector('.hero-title');
 if (heroTitle) {
-    let vincentPlayPromise = null;
-    
     heroTitle.addEventListener('mouseenter', () => {
         if (settings && settings.sfx) {
             if (!vincentAudio) {
@@ -3596,22 +3594,12 @@ if (heroTitle) {
                 vincentAudio.volume = 0.3;
             }
             vincentAudio.currentTime = 0;
-            vincentPlayPromise = vincentAudio.play();
-            if (vincentPlayPromise) {
-                vincentPlayPromise.catch(e => {
-                    // Silently handle interruptions
-                });
-            }
+            vincentAudio.play().catch(e => console.warn('Vincent audio play failed:', e));
         }
     });
-    
     heroTitle.addEventListener('mouseleave', () => {
-        if (vincentAudio && vincentPlayPromise) {
-            vincentPlayPromise.then(() => {
-                vincentAudio.pause();
-            }).catch(() => {
-                // Audio wasn't playing yet, nothing to pause
-            });
+        if (vincentAudio) {
+            vincentAudio.pause();
         }
     });
 }
