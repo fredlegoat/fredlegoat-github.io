@@ -888,6 +888,7 @@ let questionAudio = null; // Audio pour le modal de calcul
 let correctAudio = null; // Audio pour la validation d'un mot correct
 let closeAudio = null; // Audio pour la fermeture de modal
 let victoryAudio = null; // Audio pour la page bonus
+let vincentAudio = null; // Audio pour le hover du hero title
 let wasMusicPlayingBeforeQuestion = false; // Pour savoir si on doit reprendre la musique
 
 function updateMusicPlayer(gridIndex) {
@@ -3586,15 +3587,32 @@ interactiveElements.forEach(element => {
 // Vincent sound effect on hero title hover
 const heroTitle = document.querySelector('.hero-title');
 if (heroTitle) {
-    const vincentAudio = new Audio('mp3/vincent.mp3');
+    let vincentPlayPromise = null;
+    
     heroTitle.addEventListener('mouseenter', () => {
         if (settings && settings.sfx) {
+            if (!vincentAudio) {
+                vincentAudio = new Audio('mp3/vincent.mp3');
+                vincentAudio.volume = 0.3;
+            }
             vincentAudio.currentTime = 0;
-            vincentAudio.play().catch(e => { });
+            vincentPlayPromise = vincentAudio.play();
+            if (vincentPlayPromise) {
+                vincentPlayPromise.catch(e => {
+                    // Silently handle interruptions
+                });
+            }
         }
     });
+    
     heroTitle.addEventListener('mouseleave', () => {
-        vincentAudio.pause();
+        if (vincentAudio && vincentPlayPromise) {
+            vincentPlayPromise.then(() => {
+                vincentAudio.pause();
+            }).catch(() => {
+                // Audio wasn't playing yet, nothing to pause
+            });
+        }
     });
 }
 
